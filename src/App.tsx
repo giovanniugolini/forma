@@ -38,7 +38,8 @@ const categories: Category[] = [
                     "disequazioni-secondo-grado",
                     "sistemi-disequazioni",
                     "disequazioni-soluzioni",
-                    "segno-di-un-prodotto"
+                    "segno-di-un-prodotto",
+                    "sistemi-secondo-grado"
 
                 ],
             },
@@ -52,6 +53,7 @@ const categories: Category[] = [
                     "limite-infinito-finito",
                     "limite-finito-infinito",
                     "limite-infinito-infinito",
+                    "funzioni-continue"
                 ],
             },
             {
@@ -68,6 +70,7 @@ const categories: Category[] = [
                 slugs: [
                     "angolo-rotazione",
                     "archi-associati",
+                    "equazioni-goniometriche"
                 ],
             },
             {
@@ -100,6 +103,7 @@ const categories: Category[] = [
                     "velocita-media-secante",
                     "moto-uniformemente-accelerato",
                     "caduta-libera",
+                    "moto-circolare-uniforme"
                 ],
             },
             {
@@ -109,6 +113,7 @@ const categories: Category[] = [
                     "campo-elettrico",
                     "legge-di-coulomb",
                     "condensatore",
+                    "legge-hom"
                 ],
             },
             {
@@ -169,7 +174,11 @@ const newDemoSlugs = new Set([
     "quiz-algebra",
     "verifica-algebra-1",
     "quiz-vettori",
-    "risoluzione-di-un-triangolo-rettangolo"
+    "risoluzione-di-un-triangolo-rettangolo",
+    "legge-hom",
+    "sistemi-secondo-grado",
+    "funzioni-continue",
+    "equazioni-goniometriche"
 ]);
 
 // ============ COMPONENTI ============

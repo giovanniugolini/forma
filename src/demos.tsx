@@ -167,17 +167,23 @@ export const demos: DemoInfo[] = [
         title: "Il Condensatore: Capacità, Carica ed Energia",
         Component: React.lazy(() => import("./demos/elettromagnetismo/./CondensatoreDemo")),
     },
-    // ============ NUOVE DEMO ELETTROMAGNETISMO ============
+    // ============ NUOVE DEMO COMPONENTI VETTORE ============
     {
         slug: "componenti-cartesiane-vettore",
         title: "Componenti Cartesiane di un vettore",
         Component: React.lazy(() => import("./demos/vettori-piano/./ComponentiCartesianeVettoreDemo")),
     },
+    // ============ NUOVE DEMO CINEMATICA ============
+    {
+        slug: "moto-circolare-uniforme",
+        title: "Moto Circolare Uniforme",
+        Component: React.lazy(() => import("./demos/cinematica/./MotoCircolareUniformeDemo")),
+    },
 
     // ============ SEGNO DI N PRODOTTO ============
     {
         slug: "segno-di-un-prodotto",
-        title: "Segno di un prodotto",
+        title: "Disequazioni prodotto e disequazioni fratte",
         Component: React.lazy(() => import("./demos/algebra/./SegnoDiUnProdotto.tsx")),
     },
 
@@ -202,5 +208,26 @@ export const demos: DemoInfo[] = [
         slug: "quiz-vettori",
         title: "Quiz: Vettori (random)",
         Component: React.lazy(() => import("./demos/quiz/QuizVettoriDemo")),
+  
+    },
+    {
+        slug: "legge-hom",
+        title: "La prima legge di Ohm (laboratorio online)",
+        Component: React.lazy(() => import("./demos/elettromagnetismo/Leggeohmdemo.tsx")),
+    },
+    {
+        slug: "sistemi-secondo-grado",
+        title: "Sistemi di Secondo grado (step by step)",
+        Component: React.lazy(() => import("./demos/equazioni/SistemiSecondoGrado.tsx")),
+    },
+    {
+        slug: "funzioni-continue",
+        title: "Funzioni Continue",
+        Component: React.lazy(() => import("./demos/funzioni/FunzioniContinueDemo.tsx")),
+    },
+    {
+        slug: "equazioni-goniometriche",
+        title: "Equazioni Goniometriche",
+        Component: React.lazy(() => import("./demos/goniometria/EquazioniGoniometricheDemo.tsx")),
     },
 ];
