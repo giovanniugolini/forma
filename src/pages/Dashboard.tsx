@@ -1,6 +1,7 @@
 import { useAuth } from '../hooks/useAuth'
 import { useUserFavorites } from '../hooks/useFavorites'
 import { useArtifacts } from '../hooks/useArtifacts'
+import { useUserQuizResults, useQuizStats } from '../hooks/useQuizResults'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
 
 export default function Dashboard() {
@@ -9,6 +10,8 @@ export default function Dashboard() {
   const { artifacts: myArtifacts, loading: artifactsLoading } = useArtifacts({ 
     ownerId: user?.id 
   })
+  const { results: quizResults, loading: quizLoading } = useUserQuizResults(user?.id)
+  const { stats: quizStats } = useQuizStats(user?.id)
 
   if (authLoading) {
     return (
@@ -35,6 +38,16 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   return (
@@ -77,7 +90,7 @@ export default function Dashboard() {
       </section>
 
       {/* Statistiche */}
-      <section className="grid grid-cols-3 gap-4 mb-6">
+      <section className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-blue-600">{favorites.length}</p>
           <p className="text-sm text-blue-700">Preferiti</p>
@@ -87,8 +100,14 @@ export default function Dashboard() {
           <p className="text-sm text-green-700">Miei contenuti</p>
         </div>
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-purple-600">0</p>
+          <p className="text-3xl font-bold text-purple-600">{quizResults.length}</p>
           <p className="text-sm text-purple-700">Quiz completati</p>
+        </div>
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-orange-600">
+            {quizStats?.averagePercentage || 0}%
+          </p>
+          <p className="text-sm text-orange-700">Media quiz</p>
         </div>
       </section>
 
@@ -121,6 +140,75 @@ export default function Dashboard() {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      {/* Cronologia Quiz */}
+      <section className="bg-white border rounded-lg p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">📝 Cronologia Quiz</h2>
+        {quizLoading ? (
+          <p className="text-gray-500">Caricamento...</p>
+        ) : quizResults.length === 0 ? (
+          <div>
+            <p className="text-gray-500 mb-3">Nessun quiz completato.</p>
+            <a 
+              href="#/quiz-algebra" 
+              className="text-blue-500 hover:underline text-sm"
+            >
+              → Prova il Quiz di Algebra
+            </a>
+          </div>
+        ) : (
+          <div>
+            {/* Statistiche dettagliate */}
+            {quizStats && (
+              <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded">
+                <div className="text-center">
+                  <p className="text-lg font-bold text-green-600">{quizStats.bestPercentage}%</p>
+                  <p className="text-xs text-gray-500">Miglior risultato</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-blue-600">{quizStats.averagePercentage}%</p>
+                  <p className="text-xs text-gray-500">Media</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-orange-600">{quizStats.worstPercentage}%</p>
+                  <p className="text-xs text-gray-500">Peggior risultato</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Lista risultati */}
+            <ul className="space-y-3">
+              {quizResults.slice(0, 5).map((result) => (
+                <li 
+                  key={result.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                >
+                  <div>
+                    <p className="font-medium">
+                      Quiz ID: {result.quiz_id.slice(0, 8)}...
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatDate(result.completed_at)}
+                      {result.time_spent && ` • ${Math.floor(result.time_spent / 60)}:${(result.time_spent % 60).toString().padStart(2, '0')}`}
+                    </p>
+                  </div>
+                  <div className={`text-lg font-bold ${
+                    result.percentage >= 60 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {result.score}/{result.max_score} ({result.percentage}%)
+                  </div>
+                </li>
+              ))}
+            </ul>
+            
+            {quizResults.length > 5 && (
+              <p className="text-sm text-gray-500 mt-3 text-center">
+                ... e altri {quizResults.length - 5} risultati
+              </p>
+            )}
+          </div>
         )}
       </section>
 
@@ -166,18 +254,13 @@ export default function Dashboard() {
         </section>
       ) : null}
 
-      {/* Cronologia Quiz (placeholder) */}
-      <section className="bg-white border rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">📝 Cronologia Quiz</h2>
-        <p className="text-gray-500">Nessun quiz completato. La cronologia apparirà qui.</p>
-      </section>
-
       {/* Link sviluppo */}
       <div className="mt-6 p-4 bg-gray-100 rounded text-sm">
         <p><strong>Link sviluppo:</strong></p>
         <div className="flex gap-4 mt-2">
           <a href="#/auth-test" className="text-blue-500">Auth Test</a>
           <a href="#/artifacts-test" className="text-blue-500">Artifacts Test</a>
+          <a href="#/quiz-algebra" className="text-blue-500">Quiz Algebra</a>
           <a href="http://127.0.0.1:54323" className="text-blue-500" target="_blank">Supabase Studio</a>
         </div>
       </div>
