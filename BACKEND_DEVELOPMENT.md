@@ -3,7 +3,7 @@
 ## Stato Attuale
 **Repository:** forma
 **Branch:** main
-**Data ultimo aggiornamento:** 13 Febbraio 2026
+**Data ultimo aggiornamento:** 14 Febbraio 2026
 
 ---
 
@@ -66,37 +66,70 @@ git merge upstream/main
 ### Dashboard Utente (Punto 3)
 - [x] Pagina `/dashboard`
 - [x] Sezione profilo
-- [x] Sezione statistiche
+- [x] Sezione statistiche (4 card)
 - [x] Lista preferiti
 - [x] Lista contenuti propri
-- [x] Placeholder cronologia quiz
-
----
-
-## 🔄 In Corso
+- [x] Cronologia quiz con statistiche
 
 ### Sistema Quiz (Punto 4)
-- [x] Tipi quiz (`src/types/quiz.ts`)
-- [ ] Componente `QuestionCard`
-- [ ] Componente `QuizRunner`
-- [ ] Componente `ResultsView`
-- [ ] Hook `useQuizResults`
-- [ ] Pagina test quiz
-- [ ] Integrazione Dashboard
+- [x] Tipi quiz (`src/types/quiz.ts`) - già esistenti
+- [x] Hook `useQuiz` - già esistente
+- [x] Componenti Quiz UI - già esistenti
+- [x] Demo quiz (QuizAlgebra, QuizVettori) - già esistenti
+- [x] Hook `useQuizResults` per salvataggio su Supabase
+- [x] Hook `useQuizStats` per statistiche
+- [x] Integrazione salvataggio in QuizAlgebraDemo
+- [x] Integrazione Dashboard con cronologia
+
+### Fix e Configurazioni
+- [x] Tailwind config con content paths
+- [x] CSS con direttive @tailwind
+- [x] File .env.local per variabili Supabase
 
 ---
 
-## 📋 Prossimi Passi
+## 🔄 Da Testare
 
-### Punto 5 - Commenti
+- [ ] Verifica salvataggio quiz su Supabase
+- [ ] Verifica cronologia quiz in Dashboard
+
+---
+
+## 📋 Roadmap Prossime Fasi
+
+### Fase 5 - Miglioramenti Dashboard
+- [ ] Layout più moderno e responsive
+- [ ] Card con icone e colori più accattivanti
+- [ ] Grafici statistiche (chart.js o recharts)
+- [ ] Navigazione migliorata
+- [ ] Dark mode (opzionale)
+
+### Fase 6 - Sistema Ricerca e Hashtag
+- [ ] Migrazione: campo `tags` in artifacts
+- [ ] Componente barra di ricerca
+- [ ] Filtri per categoria, materia, livello
+- [ ] Sistema hashtag (#algebra, #cinematica, ecc.)
+- [ ] Pagina "Esplora" con risultati ricerca
+
+### Fase 7 - Creazione Quiz Utente
+- [ ] Editor quiz (UI per creare domande)
+- [ ] Salvataggio quiz come artifact
+- [ ] Preview quiz prima della pubblicazione
+- [ ] Pubblicazione e condivisione
+- [ ] Visibilità: pubblico / privato / gruppo
+
+### Fase 8 - Sistema Gruppi/Classi
+- [ ] Migrazione: tabella `groups` e `group_members`
+- [ ] Creazione gruppo/classe (per docenti)
+- [ ] Invito studenti (codice o link)
+- [ ] Condivisione quiz con gruppo
+- [ ] Dashboard docente con risultati classe
+
+### Fase 9 - Commenti e Interazioni
 - [ ] Migrazione: tabella `comments`
-- [ ] Hook `useComments`
 - [ ] Componente `CommentSection`
-
-### Miglioramenti UI
-- [ ] Sistemare stili Tailwind
-- [ ] Tema coerente
-- [ ] Navigazione principale
+- [ ] Like/dislike su commenti
+- [ ] Notifiche (opzionale)
 
 ---
 
@@ -111,16 +144,20 @@ src/
 ├── hooks/
 │   ├── useAuth.ts         ✅
 │   ├── useArtifacts.ts    ✅
-│   └── useFavorites.ts    ✅
+│   ├── useFavorites.ts    ✅
+│   ├── useQuiz.ts         ✅
+│   └── useQuizResults.ts  ✅
 ├── components/
 │   ├── ui/
-│   │   └── FavoriteButton.tsx  ✅
-│   └── quiz/              🔄
-│       ├── QuestionCard.tsx
-│       ├── QuizRunner.tsx
-│       └── ResultsView.tsx
+│   │   ├── FavoriteButton.tsx  ✅
+│   │   └── Quiz.tsx            ✅
+│   └── quiz/              (componenti aggiuntivi)
 ├── types/
 │   └── quiz.ts            ✅
+├── utils/
+│   └── quiz/
+│       ├── generators.ts  ✅
+│       └── scoring.ts     ✅
 └── pages/
     ├── AuthTest.tsx       ✅
     ├── ArtifactsTest.tsx  ✅
@@ -142,13 +179,14 @@ supabase/
 | Dashboard | http://localhost:3000/matematica-fisica/\#/dashboard |
 | Auth Test | http://localhost:3000/matematica-fisica/\#/auth-test |
 | Artifacts Test | http://localhost:3000/matematica-fisica/\#/artifacts-test |
+| Quiz Algebra | http://localhost:3000/matematica-fisica/\#/quiz-algebra |
 | Supabase Studio | http://127.0.0.1:54323 |
 | Mailpit | http://127.0.0.1:54324 |
-| API REST | http://127.0.0.1:54321/rest/v1 |
 
 ---
 
 ## 🗒️ Note
 
 - Sincronizzare periodicamente le demo da `upstream/main`
-- Prima di sviluppare su matematica-fisica, assicurarsi che forma sia aggiornato
+- Testare salvataggio quiz prima di procedere con Fase 5
+- La Dashboard necessita di miglioramenti UI significativi

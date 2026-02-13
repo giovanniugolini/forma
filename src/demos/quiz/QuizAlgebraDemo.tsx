@@ -1,7 +1,6 @@
 /**
  * QuizAlgebraDemo - Quiz random sulle equazioni di secondo grado
  */
-
 import React, { useState, useCallback } from "react";
 import {
     QuizContainer,
@@ -12,6 +11,8 @@ import {
     QuizResults,
 } from "../../components/ui/Quiz";
 import { useQuiz } from "../../hooks/useQuiz";
+import { useSaveQuizResult } from "../../hooks/useQuizResults";
+import { useAuth } from "../../hooks/useAuth";
 import type { QuizDefinition, QuizScore } from "../../types/quiz";
 import { generateAlgebraQuiz } from "../../utils/quiz/generators";
 
@@ -24,7 +25,7 @@ function createRandomQuiz(): QuizDefinition {
         description:
             "Verifica le tue conoscenze sulle equazioni di secondo grado",
         questions: generateAlgebraQuiz(QUIZ_LENGTH),
-        shuffleQuestions: false, // Già randomizzato dal generatore
+        shuffleQuestions: false,
         shuffleOptions: false,
         passingScore: 60,
     };
@@ -33,6 +34,10 @@ function createRandomQuiz(): QuizDefinition {
 export default function QuizAlgebraDemo(): React.ReactElement {
     const [quiz, setQuiz] = useState<QuizDefinition>(createRandomQuiz);
     const [showImmediateFeedback, setShowImmediateFeedback] = useState(true);
+    const [resultSaved, setResultSaved] = useState(false);
+    
+    const { user } = useAuth();
+    const { save: saveQuizResult } = useSaveQuizResult();
 
     const {
         state,
@@ -54,16 +59,32 @@ export default function QuizAlgebraDemo(): React.ReactElement {
     } = useQuiz({
         quiz,
         showImmediateFeedback,
+        onComplete: async (finalScore: QuizScore) => {
+            if (!user || resultSaved) return;
+            
+            const result = await saveQuizResult({
+                quizId: quiz.id,
+                score: finalScore,
+                answers: state.answers,
+                timeSpent: state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : undefined
+            });
+            
+            if (result) {
+                setResultSaved(true);
+                console.log('Quiz result saved:', result);
+            }
+        },
     });
 
     const handleRetry = useCallback(() => {
-        // Genera un nuovo quiz random
         setQuiz(createRandomQuiz());
+        setResultSaved(false);
         reset();
     }, [reset]);
 
     const handleNewQuiz = useCallback(() => {
         setQuiz(createRandomQuiz());
+        setResultSaved(false);
         reset();
     }, [reset]);
 
@@ -78,27 +99,17 @@ export default function QuizAlgebraDemo(): React.ReactElement {
                     <QuizStartScreen
                         title={quiz.title}
                         description={quiz.description}
-                        questionCount={questions.length}
+                        questionCount={quiz.questions.length}
                         onStart={start}
                     />
-
-                    {/* Opzioni */}
-                    <div
-                        style={{
-                            marginTop: 20,
-                            padding: 16,
-                            background: "#f8fafc",
-                            borderRadius: 12,
-                        }}
-                    >
+                    <div style={{ marginTop: 16, textAlign: "center" }}>
                         <label
                             style={{
                                 display: "flex",
                                 alignItems: "center",
+                                justifyContent: "center",
                                 gap: 8,
                                 cursor: "pointer",
-                                fontSize: 14,
-                                color: "#334155",
                             }}
                         >
                             <input
@@ -107,30 +118,22 @@ export default function QuizAlgebraDemo(): React.ReactElement {
                                 onChange={(e) =>
                                     setShowImmediateFeedback(e.target.checked)
                                 }
-                                style={{ width: 18, height: 18 }}
                             />
-                            Mostra feedback immediato dopo ogni risposta
+                            <span style={{ fontSize: 14, color: "#64748b" }}>
+                                Mostra feedback immediato
+                            </span>
                         </label>
                     </div>
-
-                    {/* Pulsante genera nuovo */}
-                    <button
-                        onClick={handleNewQuiz}
-                        style={{
-                            marginTop: 16,
-                            width: "100%",
-                            padding: "12px 20px",
-                            borderRadius: 10,
-                            border: "1px solid #d1d5db",
-                            background: "#fff",
-                            color: "#334155",
-                            fontSize: 14,
-                            fontWeight: 500,
-                            cursor: "pointer",
-                        }}
-                    >
-                        🎲 Genera nuove domande
-                    </button>
+                    {user && (
+                        <p style={{ marginTop: 12, fontSize: 12, color: "#64748b", textAlign: "center" }}>
+                            🔐 I risultati verranno salvati nel tuo profilo
+                        </p>
+                    )}
+                    {!user && (
+                        <p style={{ marginTop: 12, fontSize: 12, color: "#f59e0b", textAlign: "center" }}>
+                            ⚠️ Effettua il login per salvare i risultati
+                        </p>
+                    )}
                 </>
             )}
 
@@ -138,7 +141,7 @@ export default function QuizAlgebraDemo(): React.ReactElement {
             {state.status === "in_progress" && currentQuestion && (
                 <>
                     <QuizProgress
-                        current={state.currentIndex}
+                        current={state.currentIndex + 1}
                         total={questions.length}
                         answeredCount={answeredCount}
                     />
@@ -146,34 +149,31 @@ export default function QuizAlgebraDemo(): React.ReactElement {
                     <QuizQuestionCard
                         question={currentQuestion}
                         currentAnswer={state.answers[currentQuestion.id] ?? null}
-                        onAnswer={(value) => answer(currentQuestion.id, value)}
+                        onAnswer={(value) => {
+                            answer(currentQuestion.id, value);
+                            if (showImmediateFeedback) {
+                                showFeedback();
+                            }
+                        }}
                         showFeedback={currentFeedback?.shown ?? false}
                         isCorrect={currentFeedback?.isCorrect}
-                        disabled={currentFeedback?.shown}
                     />
 
                     <QuizNavigation
                         onPrev={prev}
                         onNext={next}
                         onSubmit={submit}
-                        onShowFeedback={showImmediateFeedback ? showFeedback : undefined}
                         isFirst={isFirst}
                         isLast={isLast}
-                        canSubmit={canSubmit}
-                        showFeedbackButton={
-                            showImmediateFeedback &&
-                            state.answers[currentQuestion.id] !== null &&
-                            state.answers[currentQuestion.id] !== undefined
-                        }
-                        feedbackShown={currentFeedback?.shown ?? false}
+                        canSubmit={canSubmit && isLast}
                     />
 
                     {/* Indicatori domande */}
                     <div
                         style={{
                             display: "flex",
-                            justifyContent: "center",
                             gap: 6,
+                            justifyContent: "center",
                             marginTop: 24,
                             flexWrap: "wrap",
                         }}
@@ -183,7 +183,6 @@ export default function QuizAlgebraDemo(): React.ReactElement {
                                 state.answers[q.id] !== null &&
                                 state.answers[q.id] !== undefined;
                             const isCurrent = index === state.currentIndex;
-
                             return (
                                 <div
                                     key={q.id}
@@ -215,13 +214,25 @@ export default function QuizAlgebraDemo(): React.ReactElement {
 
             {/* Risultati */}
             {state.status === "completed" && score && (
-                <QuizResults
-                    score={score}
-                    questions={questions}
-                    answers={state.answers}
-                    onRetry={handleRetry}
-                    onBack={() => (window.location.href = "#/")}
-                />
+                <>
+                    <QuizResults
+                        score={score}
+                        questions={questions}
+                        answers={state.answers}
+                        onRetry={handleRetry}
+                        onBack={() => (window.location.href = "#/")}
+                    />
+                    {resultSaved && (
+                        <p style={{ marginTop: 16, fontSize: 14, color: "#22c55e", textAlign: "center" }}>
+                            ✅ Risultato salvato nel tuo profilo!
+                        </p>
+                    )}
+                    {user && !resultSaved && (
+                        <p style={{ marginTop: 16, fontSize: 14, color: "#f59e0b", textAlign: "center" }}>
+                            ⏳ Salvataggio in corso...
+                        </p>
+                    )}
+                </>
             )}
         </QuizContainer>
     );
